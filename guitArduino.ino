@@ -287,7 +287,7 @@ void setup()
   setupLcdInfo();
 }
 
-
+//this will decide whether to show the idle animation or the game on the matrix
 bool playing = false;
 
 unsigned long timeTurn1 = 0;
@@ -304,8 +304,14 @@ unsigned long difficultyTime = 0;
 
 unsigned long scoreTime = 0;
 int scorePeriod = 200;
+
+//NOTE: the process goes as follows: a new note is created, all notes are moved down a line followed by a waiting period,
+//      all notes are moved down again followed by another waiting period and repeat. 2 spaces are necessary between notes,
+//      so that the game is playable, as well as the waiting period so that it gives the impression notes are falling 
+//      sequentially, not 2 spaces at a time
 void loop()
 {
+  //every scorePeriod ms stats are displayed on the LCD
   if(millis() > scoreTime + scorePeriod)
   {
     scoreTime = millis();
@@ -314,36 +320,51 @@ void loop()
   
   if (playing)
   {
+    //turn 1 creates a new note and pushes all down
     if (millis() > timeTurn1 + turnPeriod && turn == 1)
     {
       timeTurn1 = millis();
-
+      
+      //note creation:
       int col = random(0, 3);
       noteManager.addNewNote(col);
       turn = 2;
+     
+      //input is read and notes are moved down:
       nextTurn();
     }
-    while (millis() < timeTurn2 + 2 * turnPeriod)
+   
+    //wait for turnPeriod ms while aldo reading input
+    while (millis() < timeTurn2 + turnPeriod)
     {
       noteManager.readInputAndUpdateScore(0);
       noteManager.readInputAndUpdateScore(1);
       noteManager.readInputAndUpdateScore(2);
     }
+   
+    //check if after reading input the player has lost:
     if (noteManager.lives <= 0)
     {
+      //show game end notification
       youLose();
+     
       playing = false;
+     
+      //reset stats displayed
       setupLcdInfo();
     }
+    //if player didn't lose
     else
     {
-      if (millis() > timeTurn2 + 2 * turnPeriod && turn == 2)
+      //turn 2 reads input and pushes notes down without creating a new one
+      if (millis() > timeTurn2 + turnPeriod && turn == 2)
       {
         timeTurn2 = millis();
         turn = 1;
         nextTurn();
       }
-
+      
+      //check for lives again, as notes moved and input was read 
       if (noteManager.lives <= 0)
       {
         youLose();
@@ -351,7 +372,8 @@ void loop()
         setupLcdInfo();
       }
     }
-
+    
+    //wait for turnPeriod ms
     while (millis() < timeTurn2 + turnPeriod)
     {
       noteManager.readInputAndUpdateScore(0);
@@ -359,21 +381,26 @@ void loop()
       noteManager.readInputAndUpdateScore(2);
     }
 
+    //every difficultyPeriod ms turnPeriod decreases, so notes will move faster, and the game will get harder
     if(millis() > difficultyTime + difficultyPeriod)
     {
       difficultyTime = millis();
       turnPeriod -= 10;
+      
+      //cap notes speed so the game doesn't become impossible
       if (turnPeriod < 100)
         turnPeriod = 100;
     }
   }
   else
   {
+    //if the game hasn't been started, show an animation on the amtrix
     waitForStart();
   }
   
 }
 
+//function to print to lcd display
 void showScoreAndLives()
 {
   lcd.clear();
@@ -387,10 +414,9 @@ void showScoreAndLives()
 
   lcd.setCursor(11, 1);
   lcd.print("LIVES");
-  /*lcd.setCursor(0, 0);
-  lcd.print(noteManager.score);*/
 }
 
+//function to display an X on the matrix and to play 3 descending chromatic notes
 void youLose()
 {
   lc.clearDisplay(0);
@@ -399,15 +425,18 @@ void youLose()
     lc.setLed(0, i, i, true);
     lc.setLed(0, i, 7 - i, true);
   }
+ 
   tone(PIEZO_PIN, NOTE_E4, 300);
   delay(333);
   tone(PIEZO_PIN, NOTE_DS4, 300);
   delay(333);
   tone(PIEZO_PIN, NOTE_D4, 300);
   delay(333);
+ 
   lc.clearDisplay(0);
 }
 
+//reads input and moves all notes down one line
 void nextTurn()
 {
     
@@ -418,6 +447,7 @@ void nextTurn()
   
 }
 
+//reads middle button, and gets game ready to play if the button was pressed
 void getStartInput()
 {
   int reading;
@@ -429,7 +459,10 @@ void getStartInput()
     playing = true;
     timeTurn1 = millis();
     timeTurn2 = millis();
+   
+    //reset turnPeriod so the game starts at normal difficulty
     turnPeriod = 200;
+   
     noteManager.toggleNoteBar(true);
     noteManager.reset();
     return;
@@ -439,6 +472,7 @@ void getStartInput()
 
 void waitForStart()
 {
+  //shows the bigger square on the matrix every animationPeriod ms
   if (millis() > timeAnimation1 + animationPeriod)
   {
     timeAnimation1 = millis();
@@ -456,18 +490,21 @@ void waitForStart()
       lc.setLed(0, i, 5, true);
     }
   }
-
+  
+  //leaves the bigger square on the matrix for animationPeriod ms while reading input
   while (millis() < timeAnimation1 + animationPeriod)
   {
+    //getStartInput() will change the bool variable 'playing' instead of returning, to avoid memory overhead
     if(!playing)
       getStartInput();
     else
       return;
   }
   
-  
+  //get the time when the smaller square is displayed
   timeAnimation2 = millis();
   
+  //display the smaller square
   lc.clearDisplay(0);
 
   lc.setLed(0, 3, 3, true);
@@ -475,7 +512,7 @@ void waitForStart()
   lc.setLed(0, 4, 3, true);
   lc.setLed(0, 4, 4, true);
   
-  
+  //repeat the process, but this time showing the smaller square on the matrix
   while (millis() < timeAnimation2 + animationPeriod)
   {
     if(!playing)
