@@ -21,3 +21,18 @@
     i) a note is played upon striking a note correctly (the game plays a melody if no notes are missed)
     ii) a disonant note is played when losing points
   
+  Compononents:
+  1x Arduino Uno
+  1x LED Matrix 1088AS
+  1x MAX7219 LED Control Driver
+  3x Buttons
+  1x 16x2 LCD Display
+  1x Piezo buzzer
+  4x 10k ohms resistances
+  1x 100k ohms resistance
+  1x 220 ohms resistance
+  1x 10uF condenser
+  1x 0.1uF condenser
+  4x Breadboards
+  1x Arduino USB cable
+  Jumper wires
