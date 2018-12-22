@@ -8,7 +8,7 @@
 #define BUTTON_MIDDLE_PIN A4
 #define BUTTON_RIGHT_PIN A5
 #define PIEZO_PIN 8
-#define V0_PIN 9 // PWN in loc de POTENTIOMETRU
+#define V0_PIN 9 // pin to control lcd display contrast
 
 LiquidCrystal lcd(2, 3, 4, 5, 6, 7);
 LedControl lc = LedControl(12, 11, 10, 1); //DIN, CLK, LOAD, No. DRIVER
@@ -265,11 +265,9 @@ void setupLcdInfo()
 }
 
 void setup()
-{
-  //Serial.begin(9600);
-  
+{ 
   lc.shutdown(0, false); // turn off power saving, enables display
-  lc.setIntensity(0, 2); // sets brightness (0~15 possible values)
+  lc.setIntensity(0, 2); // sets brightness 
   lc.clearDisplay(0);// clear screen
   
   randomSeed(analogRead(0));
