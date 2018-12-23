@@ -1,5 +1,7 @@
 # GuitArduino
 
+  Video: https://drive.google.com/file/d/16yYEdROHeOkW0FT_49J8HHZDQaQcwaZG/view?usp=sharing
+
   Description
 
   The game follows the guitar hero concept (ergo the name), dividing the matrix into 3 columns (each having a corresponding button) on which notes are constantly falling, and a marker, requring the player to hit the correct button when the note is on the marker. It follows the arcade style, lacking levels, while getting progressively more difficult. As time passes, notes are falling at a bigger speed rate, with a cap at ~200ms (i. e. one new note every ~200 ms). Also, the column for each new note is generated randomly.  
